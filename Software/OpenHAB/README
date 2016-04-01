@@ -1,0 +1,14 @@
+Steps to install OpenHAB in folder from: http://www.instructables.com/id/OpenHAB-on-Raspberry-Pi/
+                                         http://www.openhab.org/getting-started/
+                                         http://www.makeuseof.com/tag/getting-started-openhab-home-automation-raspberry-pi/
+
+Install by running Install.sh
+
+Make sure matchbox-window-manager and epiphany-browser is installed first (Included with BlockComPi Software)
+Also Make sure PiTFT is setup as it runs on PiTFT
+Run xinit ./WebUI.sh to start X11 UI
+
+Make sure BlockComPi Software is installed first to run full config software
+Run OpenHABUI.py in folder as root to start full config software
+
+Done by Terence Chan Zun Mun with no licence (too lazy and useless to include one)

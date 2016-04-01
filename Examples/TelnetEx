@@ -1,0 +1,10 @@
+import telnetlib
+ip = '192.168.1.97' #ip addr of telnet server
+esp8266 = telnetlib.Telnet(ip)
+import time
+time.sleep(1)
+esp8266.write('output 1')
+print('on')
+time.sleep(1)
+esp8266.write('output 0')
+print('off')

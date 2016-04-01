@@ -1,0 +1,10 @@
+import telnetlib
+import time
+ip = '192.168.1.13' #ip addr of telnet server
+esp8266 = telnetlib.Telnet(ip)
+output = ""
+while True:
+  esp8266.write('shwinput')
+  output = esp8266.read_until(" input",1)
+  print(output)
+  print("state")

@@ -1,0 +1,2 @@
+hostname = 'Raspberry'
+password = 'password'
