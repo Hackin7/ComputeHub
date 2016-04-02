@@ -11,4 +11,4 @@ Run xinit ./WebUI.sh to start X11 UI
 Make sure BlockComPi Software is installed first to run full config software
 Run OpenHABUI.py in folder as root to start full config software
 
-Done by Terence Chan Zun Mun with no licence (too lazy and useless to include one)
+Done by Hackin7 with no licence (too lazy and useless to include one)
