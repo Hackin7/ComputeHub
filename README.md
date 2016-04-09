@@ -8,3 +8,5 @@ Main Goals:
   Cloud Computing
   
   TV Box
+
+Weekly Updates! (except during my exams)
