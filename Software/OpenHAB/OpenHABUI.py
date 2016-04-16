@@ -11,10 +11,20 @@ def WebUI():
     initdis()
 
 import layout
+returner = 0
+def backer():
+    global returner
+    if (returner == 1):
+        if (MenuUI.page > 0):
+           MenuUI.back = 1
+        elif (MenuUI.page == 0):
+           MenuUI.back = 1
+           returner = 0
 class UIConfig:
     def __init__(self): pass
     def addon(self,mode,*details):
-      def func():  
+      def func():
+        backer()  
         def add():
             if mode == 0:
                 name = UIConfig().addlayout()
@@ -26,9 +36,10 @@ class UIConfig:
                 UIConfig().rooms(details[0])()
             elif mode == 2:
                 name = UIConfig().addlayout()
-                if name != '': layout.devices.append((details[0],details[1],name))
+                if name != '': layout.devices.append((details[0],details[1],name,'Call'))
                 UIConfig().devices(details[0],details[1])()
-            MenuUI.back = 1
+            global returner
+            returner = 1
         def change(): UIConfig().selection(mode,details)
         make_button('+', 165, 30, 27, 30, 5, yellow, 24, add)
         make_button('Select', 205, 30, 27, 90, 5, blue, 24, change)
@@ -73,6 +84,7 @@ class UIConfig:
               return name
 
     def selection(self,mode,details):
+        global returner
         counter = 1
         things = []
         if mode == 0:
@@ -81,8 +93,9 @@ class UIConfig:
                   thing = (thing,blue,20,UIConfig().select(0,counter,thing))
                   things.append(thing)
                   counter = counter + 1
-                MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,passs)
+                MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
                 MenuUI.back = 0
+                returner = 0
                 UIConfig().floors()
         elif mode == 1:
                 while counter <= len(layout.rooms):
@@ -91,8 +104,9 @@ class UIConfig:
                       thing = (thing[1],blue,20,UIConfig().select(1,counter,thing))
                       things.append(thing)
                   counter = counter + 1
-                MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,passs)
+                MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
                 MenuUI.back = 0
+                returner = 0
                 UIConfig().rooms(details[0])()
         elif mode == 2:
             while counter <= len(layout.devices):
@@ -101,13 +115,15 @@ class UIConfig:
                   thing = (thing[2],blue,20,UIConfig().select(2,counter,thing))
                   things.append(thing)
               counter = counter + 1
-            MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,passs)
+            MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
             MenuUI.back = 0
+            returner = 0
             UIConfig().devices(details[0],details[1])()
-        MenuUI.back = 1
+        returner = 1
             
     def select(self,mode,position,details):
       def func():
+        global returner
         def interface(level,name,rename,remove,places,mover):
             clearall()
             make_label(level + ':', 40, 30, 60, cyan)
@@ -125,12 +141,13 @@ class UIConfig:
                 while counter <= places:
                     things.append((str(counter),blue,20,mover(counter)))
                     counter = counter + 1
-                MenuUI.menu.load(MenuUI.menu.slotconf,'Move To',yellow,things,passs)
+                MenuUI.menu.load(MenuUI.menu.slotconf,'Move To',yellow,things,backer)
                 MenuUI.back = 1
             make_button(name, 40, 85, 40, 240, 5, yellow, 40, change)
             make_button('Remove', 25, 139, 27, 130, 5, red, 25, remove)
             make_button('Move', 165, 139, 27, 130, 5, blue, 25, move)
-            def exit(): MenuUI.back = 1
+            def exit():
+                MenuUI.back = 1
             MenuUI.menu.slotconf(7, ('Back', white, 24, exit))
         def check():
             while 1: 
@@ -149,6 +166,7 @@ class UIConfig:
                 def func():
                     layout.floors.pop(position-1)
                     layout.floors.insert(place-1,details)
+                    returner = 1
                     MenuUI.back = 1
                 return func
             interface('Floor',details,rename,remove,len(layout.floors),move)
@@ -175,6 +193,7 @@ class UIConfig:
                 def func():
                     layout.rooms.pop(position-1)
                     layout.rooms.insert(things[place-1],details)
+                    returner = 1
                     MenuUI.back = 1
                 return func
             interface('Room',details[1],rename,remove,noplaces,move)
@@ -202,10 +221,12 @@ class UIConfig:
                 def func():
                     layout.devices.pop(position-1)
                     layout.devices.insert(place-1,details)
+                    returner = 1
                     MenuUI.back = 1
                 return func
             interface('Device',details[2],rename,remove,noplaces,move)
             check()
+        returner = 1
       return func
 
     def rename(self,mode,details,rename):
@@ -282,11 +303,75 @@ class UIConfig:
         while counter <= len(layout.devices):
           thing = layout.devices[counter-1]
           if (thing[0] == floor) and (thing[1] == room):
-              thing = (thing[2],orange,20,passs)
+              thing = (thing[2],orange,20,UIConfig().devicemenu(counter,thing))
               things.append(thing)
           counter = counter + 1
         MenuUI.menu.load(MenuUI.menu.slotconf,'Devices',green,things,UIConfig().addon(2,floor,room))
       return func
+
+    def devicemenu(self,position,device):
+      def func():  
+        def interface(name,type):
+            clearall()
+            make_label('Device:', 40, 30, 60, cyan)
+            def rename(renamed):
+                layout.devices.pop(position-1)
+                detail = list(device)
+                detail.pop(2)
+                detail.insert(2,renamed)
+                layout.devices.insert(position-1,tuple(detail))
+            def change():
+                vkey = VirtualKeyboard(screen)
+                newname = vkey.run(device[2])
+                rename(newname)
+                clearall()
+                interface(newname,type)
+                check()
+                MenuUI.back = 1
+            def mode():
+                def typer(mode):
+                    def func():
+                       layout.devices.pop(position-1)
+                       detail = list(device)
+                       detail.pop(3)
+                       detail.insert(3,mode)
+                       layout.devices.insert(position-1,tuple(detail))
+                       clearall()
+                       interface(name,mode)
+                       check()
+                       global returner
+                       returner = 1
+                    return func
+                types = [('Call',blue,20,typer('Call')),
+                          ('Color',blue,20,typer('Color')),
+                          ('Contact',blue,20,typer('Contact')),
+                          ('DateTime',blue,20,typer('DateTime')),
+                          ('Dimmer',blue,20,typer('Dimmer')),
+                          ('Group',blue,20,typer('Group')),
+                          ('Location',blue,20,typer('Location')),
+                          ('Number',blue,20,typer('Number')),
+                          ('Rollershutter',blue,20,typer('Rollershutter')),
+                          ('String',blue,20,typer('String')),
+                          ('Switch',blue,20,typer('Switch'))]
+                MenuUI.menu.load(MenuUI.menu.slotconf,'Type',yellow,types,backer)
+                MenuUI.back = 1
+            make_button(name, 40, 85, 40, 240, 5, yellow, 40, change)
+            make_button('Type: '+type, 25, 139, 27, 130, 5, red, 25, mode)
+            #make_button('Move', 165, 139, 27, 130, 5, blue, 25, move)
+            def exit(): MenuUI.back = 1
+            MenuUI.menu.slotconf(7, ('Back', white, 24, exit))
+        def check():
+            while 1: 
+              touchdisch()
+              if MenuUI.back == 1: break
+        interface(device[2],device[3])
+        check()
+        MenuUI.back = 0
+        UIConfig().devices(device[0],device[1])()
+        MenuUI.back = 1
+      return func
+
+        
     def filerewrite(self):
         #####layout.py##########################################################################
         #####Floors#########################
@@ -329,8 +414,12 @@ class UIConfig:
         while counter <= len(layout.rooms):
           os.system('echo '+"'"+'Group '+layout.rooms[counter-1][1]+' "'+layout.rooms[counter-1][1]+'" 	<video> ('+layout.rooms[counter-1][0]+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
           counter = counter + 1
+        counter = 1
+        while counter <= len(layout.devices):
+          os.system('echo '+"'"+layout.devices[counter-1][3]+' '+layout.devices[counter-1][2]+' "'+layout.devices[counter-1][2]+'" ('+layout.devices[counter-1][1]+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
+          counter = counter + 1
         #######################################################################################
 
 def passs(): pass #Debugging
 mainmenu = (('WebUI', yellow, 24, WebUI),('UI config', green, 24, UIConfig().floors)) #Debugging
-MenuUI.menu.load(MenuUI.menu.slotconf,'OpenHAB',cyan,mainmenu,passs)
+MenuUI.menu.load(MenuUI.menu.slotconf,'OpenHAB',cyan,mainmenu,backer)
