@@ -157,10 +157,9 @@ class UIConfig:
             def rename(renamed):
                 layout.floors.pop(position-1)
                 layout.floors.insert(position-1,renamed)
-                UIConfig().rename(1,details,renamed)
             def remove():
                 layout.floors.pop(position-1)
-                UIConfig().remove(1,details)
+                UIConfig().remove(1,position)
                 MenuUI.back = 1
             def move(place):
                 def func():
@@ -175,10 +174,9 @@ class UIConfig:
             def rename(renamed):
                 layout.rooms.pop(position-1)
                 layout.rooms.insert(position-1,(details[0],renamed))
-                UIConfig().rename(2,details,(details[0],renamed))
             def remove():
                 layout.rooms.pop(position-1)
-                UIConfig().remove(2,details)
+                UIConfig().remove(2,(details[0],position))
                 MenuUI.back = 1
             noplaces = 0
             things = []
@@ -229,34 +227,6 @@ class UIConfig:
         returner = 1
       return func
 
-    def rename(self,mode,details,rename):
-        counter = 1
-        if mode == 1:
-            oglist = tuple(layout.rooms)
-            while counter <= len(oglist):
-                thing = oglist[counter-1]
-                if thing[0] == details:
-                    layout.rooms.pop(counter-1)
-                    renamed = list(thing)
-                    renamed.pop(0)
-                    renamed.insert(0,rename)
-                    layout.rooms.insert(counter-1,tuple(renamed))
-                    UIConfig().rename(2,thing,renamed)
-                counter = counter + 1
-        if mode == 2:
-            oglist = tuple(layout.devices)
-            while counter <= len(oglist):
-              thing = oglist[counter-1]
-              if (thing[0] == details[0]) and (thing[1] == details[1]):
-                  layout.devices.pop(counter-1)
-                  renamed = list(thing)
-                  renamed.pop(0)
-                  renamed.insert(0,rename[0])
-                  renamed.pop(1)
-                  renamed.insert(1,rename[1])
-                  layout.devices.insert(counter-1,tuple(renamed))
-              counter = counter + 1
-
     def remove(self,mode,details):
         counter = 1
         if mode == 1:
@@ -265,7 +235,7 @@ class UIConfig:
                 thing = oglist[counter-1]
                 if thing[0] == details:
                     layout.rooms.remove(thing)
-                    UIConfig().remove(2,thing)
+                    UIConfig().remove(2,(thing[0],counter))
                 counter = counter + 1
         if mode == 2:
             oglist = tuple(layout.devices)
@@ -279,7 +249,7 @@ class UIConfig:
         things = []
         while counter <= len(layout.floors):
           thing = layout.floors[counter-1]
-          thing = (thing,orange,20,UIConfig().rooms(thing))
+          thing = (thing,orange,20,UIConfig().rooms(counter))
           things.append(thing)
           counter = counter + 1
         MenuUI.menu.load(MenuUI.menu.slotconf,'Floors',green,things,UIConfig().addon(0))
@@ -291,7 +261,7 @@ class UIConfig:
         while counter <= len(layout.rooms):
           thing = layout.rooms[counter-1]
           if thing[0] == floor:
-              thing = (thing[1],orange,20,UIConfig().devices(floor,thing[1]))
+              thing = (thing[1],orange,20,UIConfig().devices(floor,counter))
               things.append(thing)
           counter = counter + 1
         MenuUI.menu.load(MenuUI.menu.slotconf,'Rooms',green,things,UIConfig().addon(1,floor))
@@ -400,24 +370,42 @@ class UIConfig:
         os.system('echo " Frame {" >> /etc/openhab/configurations/sitemaps/main.sitemap')
         counter = 1
         while counter <= len(layout.floors):
-          os.system('echo '+"'"+'Group item='+layout.floors[counter-1]+' label="'+layout.floors[counter-1]+'" icon="hue"'+"'"+' >> /etc/openhab/configurations/sitemaps/main.sitemap')
+          os.system('echo '+"'"+'Group item='+'f'+str(counter-1)+' label="'+layout.floors[counter-1]+'" icon="hue"'+"'"+' >> /etc/openhab/configurations/sitemaps/main.sitemap')
           counter = counter + 1
         os.system('echo " }" >> /etc/openhab/configurations/sitemaps/main.sitemap')
         os.system('echo "}" >> /etc/openhab/configurations/sitemaps/main.sitemap')
         #####Items##########################
         os.system('echo "" > /etc/openhab/configurations/items/main.items')
-        counter = 1
-        while counter <= len(layout.floors):
-          os.system('echo "Group '+layout.floors[counter-1]+'" >> /etc/openhab/configurations/items/main.items')
-          counter = counter + 1
-        counter = 1
-        while counter <= len(layout.rooms):
-          os.system('echo '+"'"+'Group '+layout.rooms[counter-1][1]+' "'+layout.rooms[counter-1][1]+'" 	<video> ('+layout.rooms[counter-1][0]+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
-          counter = counter + 1
-        counter = 1
-        while counter <= len(layout.devices):
-          os.system('echo '+"'"+layout.devices[counter-1][3]+' '+layout.devices[counter-1][2]+' "'+layout.devices[counter-1][2]+'" ('+layout.devices[counter-1][1]+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
-          counter = counter + 1
+        floorcounter = 1
+        roomcounter = 1
+        devicecounter = 1
+        #####Floor#####
+        while floorcounter <= len(layout.floors):
+          os.system('echo "Group '+'f'+str(floorcounter-1)+'" >> /etc/openhab/configurations/items/main.items')
+          #####Room#####
+          while roomcounter <= len(layout.rooms):
+                room = layout.rooms[roomcounter-1]
+                if room[0] == floorcounter:
+                    os.system('echo '+"'"+'Group '+'r'+str(roomcounter-1)+' "'+room[1]+'" <video> ('+'f'+str(floorcounter-1)+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
+                    #####Devices#####
+                    while devicecounter <= len(layout.devices):
+                       device = layout.devices[devicecounter-1]
+                       if (device[0] == floorcounter) and (device[1] == roomcounter):
+                           os.system('echo '+"'"+device[3]+' '+'d'+str(devicecounter-1)+' "'+device[2]+'" ('+'r'+str(roomcounter-1)+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
+                       devicecounter = devicecounter + 1
+                    devicecounter = 1
+                    #################
+                roomcounter = roomcounter + 1
+          roomcounter = 1
+          ##############
+          floorcounter = floorcounter + 1
+        ###############
+        #while counter <= len(layout.rooms):
+        #  os.system('echo '+"'"+'Group '+layout.rooms[counter-1][1]+' "'+layout.rooms[counter-1][1]+'" 	<video> ('+layout.rooms[counter-1][0]+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
+        #  counter = counter + 1
+        #while counter <= len(layout.devices):
+        #  os.system('echo '+"'"+layout.devices[counter-1][3]+' '+layout.devices[counter-1][2]+' "'+layout.devices[counter-1][2]+'" ('+layout.devices[counter-1][1]+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
+        #  counter = counter + 1
         #######################################################################################
 
 def passs(): pass #Debugging
