@@ -69,6 +69,6 @@ def devicemod(options):
     return moder
 
 def devicewrite(device,devicename,room,options):
-    return options+' '+device+' "'+devicename+'" ('+room+')'
+    return (options+' item='+device+' icon"slider"',options+' '+device+' "'+devicename+'" ('+room+')')
 
 config = ('DeviceTest',mainsetup,devicesetup,devicemod,devicewrite)

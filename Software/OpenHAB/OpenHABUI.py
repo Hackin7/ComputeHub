@@ -25,33 +25,35 @@ def backer():
 class UIConfig:
     def __init__(self): pass
     def mainmenu(self):
-        MenuUI.menu.load(MenuUI.menu.slotconf,'Config',green,[('Structure',orange,20,UIConfig().floors),('Device Types',orange,20,UIConfig().devtypesconfig)],backer)
+        MenuUI.menu.load(MenuUI.menu.slotconf,'Config',green,[('Structure',orange,20,UIConfig().home),('Device Types',orange,20,UIConfig().devtypesconfig)],backer)
     def addon(self,mode,*details):
       def func():
         backer()  
         def add():
-            if mode == 0:
-                name = UIConfig().addlayout()
-                if name != '': layout.floors.append(name)
-                UIConfig().floors()
-            elif mode == 1:
-                name = UIConfig().addlayout()
-                if name != '': layout.rooms.append((details[0],name))
-                UIConfig().rooms(details[0])()
-            elif mode == 2:
-                name = UIConfig().addlayout()
-                if name != '': layout.devices.append((details[0],details[1],name,'None','Empty'))
-                UIConfig().devices(details[0],details[1])()
+            sett = UIConfig().addlayout()
+            if sett[1] != '':
+                if sett[0] == 0: #Group
+                    counter = 1
+                    highno = 0
+                    while counter <= len(layout.groups):
+                        print counter,highno,layout.groups[counter-1][1]
+                        if layout.groups[counter-1][1] > highno: highno = layout.groups[counter-1][1]
+                        counter = counter + 1
+                    layout.groups.append((details[0],highno+1,sett[1])) 
+                if sett[0] == 1: layout.devices.append((details[0],sett[1],'None','Empty')) #Device
+            if mode == 0: UIConfig().home()
+            elif mode == 1: UIConfig().groups(details[0],details[1])()
             global returner
             returner = 1
         def change(): UIConfig().selection(mode,details)
         make_button('+', 165, 30, 27, 30, 5, yellow, 24, add)
         make_button('Select', 205, 30, 27, 90, 5, blue, 24, change)
-        #make_button('<>', 245, 30, 27, 50, 5, blue, 24, change)
       return func
     def addlayout(self):
         global name
         name = ''
+        global typeset
+        typeset = 0
         def change():
             vkey = VirtualKeyboard(screen)
             global name
@@ -67,7 +69,8 @@ class UIConfig:
             global name
             name = ''
             MenuUI.back = 1
-          def ok():
+          def ok(type):
+            def func():
               if name == '':
                   clearall()
                   make_label("Name Can't", 40, 60, 60, cyan)
@@ -77,52 +80,61 @@ class UIConfig:
                   clearall()
                   layout()
                   return
+              global typeset
+              typeset = type
               MenuUI.back = 1
+            return func
           MenuUI.menu.slotconf(7, ('Back', white, 24, exit))
-          MenuUI.menu.slotconf(8, ('Add', white, 24, ok))
+          make_button('Add Group', 165, 149, 27, 130, 5, white, 24, ok(0))
+          MenuUI.menu.slotconf(8, ('Add Device', white, 24, ok(1)))
         layout()
         while 1: 
           touchdisch()
           if MenuUI.back == 1:
               MenuUI.back = 0
-              return name
+              return (typeset,name)
 
     def selection(self,mode,details):
         global returner
         counter = 1
         things = []
         if mode == 0:
-                while counter <= len(layout.floors):
-                  thing = layout.floors[counter-1]
-                  thing = (thing,blue,20,UIConfig().select(0,counter,thing))
-                  things.append(thing)
+                while counter <= len(layout.groups):
+                  thing = layout.groups[counter-1]
+                  if thing[0] == 0:
+                      thing = (thing[2],blue,20,passs)#UIConfig().select(0,counter,thing))
+                      things.append(thing)
                   counter = counter + 1
-                MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
-                MenuUI.back = 0
-                returner = 0
-                UIConfig().floors()
-        elif mode == 1:
-                while counter <= len(layout.rooms):
-                  thing = layout.rooms[counter-1]
-                  if thing[0] == details[0]:
-                      thing = (thing[1],blue,20,UIConfig().select(1,counter,thing))
+                counter = 1
+                while counter <= len(layout.devices):
+                  thing = layout.devices[counter-1]
+                  if thing[0] == 0:
+                      thing = (thing[1],blue,20,passs)#UIConfig().select(1,counter,thing))
                       things.append(thing)
                   counter = counter + 1
                 MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
                 MenuUI.back = 0
                 returner = 0
-                UIConfig().rooms(details[0])()
-        elif mode == 2:
-            while counter <= len(layout.devices):
-              thing = layout.devices[counter-1]
-              if (thing[0] == details[0]) and (thing[1] == details[1]):
-                  thing = (thing[2],blue,20,UIConfig().select(2,counter,thing))
-                  things.append(thing)
-              counter = counter + 1
-            MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
-            MenuUI.back = 0
-            returner = 0
-            UIConfig().devices(details[0],details[1])()
+                UIConfig().home()
+        elif mode == 1:
+                groupno = details[0]
+                while counter <= len(layout.groups):
+                  thing = layout.groups[counter-1]
+                  if thing[0] == groupno:
+                      thing = (thing[2],blue,20,passs)#UIConfig().select(0,counter,thing))
+                      things.append(thing)
+                  counter = counter + 1
+                counter = 1
+                while counter <= len(layout.devices):
+                  thing = layout.devices[counter-1]
+                  if thing[0] == groupno:
+                      thing = (thing[1],blue,20,passs)#UIConfig().select(1,counter,thing))
+                      things.append(thing)
+                  counter = counter + 1
+                MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
+                MenuUI.back = 0
+                returner = 0
+                UIConfig().groups(details[0],details[1])()
         returner = 1
             
     def select(self,mode,position,details):
@@ -149,7 +161,7 @@ class UIConfig:
                 MenuUI.back = 1
             make_button(name, 40, 85, 40, 240, 5, yellow, 40, change)
             make_button('Remove', 25, 139, 27, 130, 5, red, 25, remove)
-            make_button('Move', 165, 139, 27, 130, 5, blue, 25, move)
+            #make_button('Move', 165, 139, 27, 130, 5, blue, 25, move)
             def exit():
                 MenuUI.back = 1
             MenuUI.menu.slotconf(7, ('Back', white, 24, exit))
@@ -172,7 +184,7 @@ class UIConfig:
                     returner = 1
                     MenuUI.back = 1
                 return func
-            interface('Floor',details,rename,remove,len(layout.floors),move)
+            interface('Group',details,rename,remove,len(layout.floors),move)
             check()
         elif mode == 1:
             def rename(renamed):
@@ -204,8 +216,8 @@ class UIConfig:
             def rename(renamed):
                 layout.devices.pop(position-1)
                 detail = list(details)
-                detail.pop(2)
-                detail.insert(2,renamed)
+                detail.pop(1)
+                detail.insert(1,renamed)
                 layout.devices.insert(position-1,tuple(detail))
             def remove():
                 layout.devices.pop(position-1)
@@ -248,42 +260,45 @@ class UIConfig:
               if (thing[0] == details[0]) and (thing[1] == details[1]): layout.devices.remove(thing)
               counter = counter + 1
               
-    def floors(self):
+    def home(self):
         counter = 1
         things = []
-        while counter <= len(layout.floors):
-          thing = layout.floors[counter-1]
-          thing = (thing,orange,20,UIConfig().rooms(counter))
-          things.append(thing)
-          counter = counter + 1
-        MenuUI.menu.load(MenuUI.menu.slotconf,'Floors',green,things,UIConfig().addon(0))
-        UIConfig().filerewrite()
-    def rooms(self,floor):
-      def func():
-        counter = 1
-        things = []
-        while counter <= len(layout.rooms):
-          thing = layout.rooms[counter-1]
-          if thing[0] == floor:
-              thing = (thing[1],orange,20,UIConfig().devices(floor,counter))
+        while counter <= len(layout.groups):
+          thing = layout.groups[counter-1]
+          if thing[0] == 0:
+              thing = (thing[2],orange,20,UIConfig().groups(thing[1],thing[2]))
               things.append(thing)
           counter = counter + 1
-        MenuUI.menu.load(MenuUI.menu.slotconf,'Rooms',green,things,UIConfig().addon(1,floor))
-      return func
-    def devices(self,floor,room):
-      def func():
         counter = 1
-        things = []
         while counter <= len(layout.devices):
           thing = layout.devices[counter-1]
-          if (thing[0] == floor) and (thing[1] == room):
-              thing = (thing[2],orange,20,UIConfig().devicemenu(counter,thing))
+          if thing[0] == 0:
+              thing = (thing[1],orange,20,UIConfig().devicemenu(0,counter,thing))
               things.append(thing)
           counter = counter + 1
-        MenuUI.menu.load(MenuUI.menu.slotconf,'Devices',green,things,UIConfig().addon(2,floor,room))
+        MenuUI.menu.load(MenuUI.menu.slotconf,'Home',green,things,UIConfig().addon(0,0))
+        UIConfig().filerewrite()
+    def groups(self,groupno,name):
+      def func():
+        counter = 1
+        things = []
+        while counter <= len(layout.groups):
+          thing = layout.groups[counter-1]
+          if thing[0] == groupno:
+              thing = (thing[2],orange,20,UIConfig().groups(thing[1],thing[2]))
+              things.append(thing)
+          counter = counter + 1
+        counter = 1
+        while counter <= len(layout.devices):
+          thing = layout.devices[counter-1]
+          if thing[0] == groupno:
+              thing = (thing[1],orange,20,UIConfig().devicemenu((groupno,name),counter,thing))
+              things.append(thing)
+          counter = counter + 1
+        MenuUI.menu.load(MenuUI.menu.slotconf,name,green,things,UIConfig().addon(1,groupno,name))
       return func
 
-    def devicemenu(self,position,device):
+    def devicemenu(self,group,position,device):
       def func():  
         def interface(name,type):
             clearall()
@@ -291,12 +306,12 @@ class UIConfig:
             def rename(renamed):
                 layout.devices.pop(position-1)
                 detail = list(device)
-                detail.pop(2)
-                detail.insert(2,renamed)
+                detail.pop(1)
+                detail.insert(1,renamed)
                 layout.devices.insert(position-1,tuple(detail))
             def change():
                 vkey = VirtualKeyboard(screen)
-                newname = vkey.run(device[2])
+                newname = vkey.run(device[1])
                 rename(newname)
                 clearall()
                 interface(newname,type)
@@ -307,14 +322,14 @@ class UIConfig:
                     def func():
                        layout.devices.pop(position-1)
                        detail = list(device)
-                       detail.pop(3)
-                       detail.insert(3,mode[0])
+                       detail.pop(2)
+                       detail.insert(2,mode[0])
                        disinitdis()
                        options = mode[2]()
                        initdis()
                        if options != False:
-                           detail.pop(4)
-                           detail.insert(4,options)
+                           detail.pop(3)
+                           detail.insert(3,options)
                        layout.devices.insert(position-1,tuple(detail))
                        clearall()
                        interface(name,mode[0])
@@ -335,18 +350,17 @@ class UIConfig:
                 while counter <= len(devicetypes.types):
                     if devicetypes.types[counter-1][0] == type:
                         disinitdis()
-                        options = devicetypes.types[counter-1][3](device[4])
+                        options = devicetypes.types[counter-1][3](device[3])
                         if options != False:
                             layout.devices.pop(position-1)
                             detail = list(device)
-                            detail.pop(4)
-                            detail.insert(4,options)
+                            detail.pop(3)
+                            detail.insert(3,options)
                             layout.devices.insert(position-1,tuple(detail))
                         initdis()
                         interface(name,type)
                         check()
-                        global returner
-                        returner = 1
+                        MenuUI.back = 1
                     counter = counter + 1
             make_button(name, 40, 85, 40, 240, 5, yellow, 40, change)
             make_button('Type: '+type, 25, 139, 27, 130, 5, red, 20, mode)
@@ -357,27 +371,25 @@ class UIConfig:
             while 1: 
               touchdisch()
               if MenuUI.back == 1: break
-        interface(device[2],device[3])
+        interface(device[1],device[2])
         check()
         MenuUI.back = 0
-        UIConfig().devices(device[0],device[1])()
-        MenuUI.back = 1
+        if group == 0:
+            UIConfig().home()
+        else:
+            UIConfig().groups(group[0],group[1])()
+        global returner
+        returner = 1
       return func
 
         
     def filerewrite(self):
         #####layout.py##########################################################################
-        #####Floors#########################
-        os.system('echo "floors = []" > layout.py')
+        #####Groups#########################
+        os.system('echo "groups = []" > layout.py')
         counter = 1
-        while counter <= len(layout.floors):
-          os.system('echo "floors.append('+"'"+layout.floors[counter-1]+"'"+')" >> layout.py')
-          counter = counter + 1
-        #####Rooms##########################
-        os.system('echo "rooms = []" >> layout.py')
-        counter = 1
-        while counter <= len(layout.rooms):
-          os.system('echo "rooms.append('+str(layout.rooms[counter-1])+')" >> layout.py')
+        while counter <= len(layout.groups):
+          os.system('echo "groups.append('+str(layout.groups[counter-1])+')" >> layout.py')
           counter = counter + 1
         #####Devices###########################
         os.system('echo "devices = []" >> layout.py')
@@ -388,46 +400,49 @@ class UIConfig:
         #######################################################################################
         #####OpenHAB Config####################################################################
         #####Sitemaps#######################
-        os.system('echo '+"'"+'sitemap home label="My Home"'+"'"+' > /etc/openhab/configurations/sitemaps/main.sitemap')
+        os.system('echo '+"'"+'sitemap home label="Home"'+"'"+' > /etc/openhab/configurations/sitemaps/main.sitemap')
         os.system('echo "{" >> /etc/openhab/configurations/sitemaps/main.sitemap')
         os.system('echo " Frame {" >> /etc/openhab/configurations/sitemaps/main.sitemap')
         counter = 1
-        while counter <= len(layout.floors):
-          os.system('echo '+"'"+'Group item='+'f'+str(counter-1)+' label="'+layout.floors[counter-1]+'" icon="hue"'+"'"+' >> /etc/openhab/configurations/sitemaps/main.sitemap')
-          counter = counter + 1
+        while counter <= len(layout.groups):
+            if layout.groups[counter-1][0] == 0:
+                os.system('echo '+"'"+'Group item='+'g'+str(layout.groups[counter-1][1])+' label="'+layout.groups[counter-1][2]+'" icon="hue"'+"'"+' >> /etc/openhab/configurations/sitemaps/main.sitemap')
+            counter = counter + 1
+        counter = 1
+        while counter <= len(layout.devices):
+             device = layout.devices[counter-1]
+             devtypecounter = 1
+             while devtypecounter <= len(devicetypes.types):
+                 if (devicetypes.types[devtypecounter-1][0] == device[2]) & (device[0] == 0):
+                     deviceadd = devicetypes.types[devtypecounter-1][4]('d'+str(counter-1),device[1],'g'+str(device[0]),device[3])
+                     os.system('echo '+"'"+deviceadd[0]+"'"+' >> /etc/openhab/configurations/sitemaps/main.sitemap')
+                 devtypecounter = devtypecounter + 1
+             counter = counter + 1
         os.system('echo " }" >> /etc/openhab/configurations/sitemaps/main.sitemap')
         os.system('echo "}" >> /etc/openhab/configurations/sitemaps/main.sitemap')
         #####Items##########################
         os.system('echo "" > /etc/openhab/configurations/items/main.items')
-        floorcounter = 1
-        roomcounter = 1
-        devicecounter = 1
-        #####Floor#####
-        while floorcounter <= len(layout.floors):
-          os.system('echo "Group '+'f'+str(floorcounter-1)+'" >> /etc/openhab/configurations/items/main.items')
-          #####Room#####
-          while roomcounter <= len(layout.rooms):
-                room = layout.rooms[roomcounter-1]
-                if room[0] == floorcounter:
-                    os.system('echo '+"'"+'Group '+'r'+str(roomcounter-1)+' "'+room[1]+'" <video> ('+'f'+str(floorcounter-1)+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
-                    #####Devices#####
-                    while devicecounter <= len(layout.devices):
-                       device = layout.devices[devicecounter-1]
-                       if (device[0] == floorcounter) and (device[1] == roomcounter):
-                           counter = 1
-                           while counter <= len(devicetypes.types):
-                               if devicetypes.types[counter-1][0] == device[3]:
-                                   deviceadd = devicetypes.types[counter-1][4]('d'+str(devicecounter-1),device[2],'r'+str(roomcounter-1),device[4])
-                                   os.system('echo '+"'"+deviceadd+"'"+' >> /etc/openhab/configurations/items/main.items')
-                               counter = counter + 1
-                       devicecounter = devicecounter + 1
-                    devicecounter = 1
-                    #################
-                roomcounter = roomcounter + 1
-          roomcounter = 1
-          ##############
-          floorcounter = floorcounter + 1
-        ###############
+        counter = 1
+        #####Group#####
+        counter = 1
+        while counter <= len(layout.groups):
+          if layout.groups[counter-1][0] == 0:
+              os.system('echo "Group '+'g'+str(layout.groups[counter-1][1])+'" >> /etc/openhab/configurations/items/main.items')
+          else:
+              os.system('echo '+"'"+'Group '+'g'+str(layout.groups[counter-1][1])+' "'+layout.groups[counter-1][2]+'" <video> ('+'g'+str(layout.groups[counter-1][0])+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
+          counter = counter + 1
+        #####Devices####
+        counter = 1
+        while counter <= len(layout.devices):
+             device = layout.devices[counter-1]
+             devtypecounter = 1
+             while devtypecounter <= len(devicetypes.types):
+                 if devicetypes.types[devtypecounter-1][0] == device[2]:
+                     deviceadd = devicetypes.types[devtypecounter-1][4]('d'+str(counter-1),device[1],'g'+str(device[0]),device[3])
+                     os.system('echo '+"'"+deviceadd[1]+"'"+' >> /etc/openhab/configurations/items/main.items')
+                 devtypecounter = devtypecounter + 1
+             counter = counter + 1
+        ################
         #while counter <= len(layout.rooms):
         #  os.system('echo '+"'"+'Group '+layout.rooms[counter-1][1]+' "'+layout.rooms[counter-1][1]+'" 	<video> ('+layout.rooms[counter-1][0]+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
         #  counter = counter + 1
