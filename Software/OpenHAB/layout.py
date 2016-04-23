@@ -16,5 +16,6 @@ rooms.append((3, 'c'))
 rooms.append((3, 'd'))
 rooms.append((3, 'e'))
 devices = []
-devices.append((3, 3, '1', 'Switch'))
-devices.append((3, 3, '2', 'Dimmer'))
+devices.append((3, 3, '1', 'DeviceTest', 'Switch'))
+devices.append((3, 3, '2', 'DeviceTest', 'Dimmer'))
+devices.append((1, 7, '1', 'DeviceTest', 'Dimmer'))

@@ -4,6 +4,7 @@ from virtualKeyboard import VirtualKeyboard
 screen = pygame.display.set_mode(size)
 initdis()
 import MenuUI
+import devicetypes
 
 def WebUI():
     disinitdis()
@@ -20,8 +21,11 @@ def backer():
         elif (MenuUI.page == 0):
            MenuUI.back = 1
            returner = 0
+           
 class UIConfig:
     def __init__(self): pass
+    def mainmenu(self):
+        MenuUI.menu.load(MenuUI.menu.slotconf,'Config',green,[('Structure',orange,20,UIConfig().floors),('Device Types',orange,20,UIConfig().devtypesconfig)],backer)
     def addon(self,mode,*details):
       def func():
         backer()  
@@ -36,7 +40,7 @@ class UIConfig:
                 UIConfig().rooms(details[0])()
             elif mode == 2:
                 name = UIConfig().addlayout()
-                if name != '': layout.devices.append((details[0],details[1],name,'Call'))
+                if name != '': layout.devices.append((details[0],details[1],name,'None','Empty'))
                 UIConfig().devices(details[0],details[1])()
             global returner
             returner = 1
@@ -304,30 +308,49 @@ class UIConfig:
                        layout.devices.pop(position-1)
                        detail = list(device)
                        detail.pop(3)
-                       detail.insert(3,mode)
+                       detail.insert(3,mode[0])
+                       disinitdis()
+                       options = mode[2]()
+                       initdis()
+                       if options != False:
+                           detail.pop(4)
+                           detail.insert(4,options)
                        layout.devices.insert(position-1,tuple(detail))
                        clearall()
-                       interface(name,mode)
+                       interface(name,mode[0])
                        check()
                        global returner
                        returner = 1
                     return func
-                types = [('Call',blue,20,typer('Call')),
-                          ('Color',blue,20,typer('Color')),
-                          ('Contact',blue,20,typer('Contact')),
-                          ('DateTime',blue,20,typer('DateTime')),
-                          ('Dimmer',blue,20,typer('Dimmer')),
-                          ('Group',blue,20,typer('Group')),
-                          ('Location',blue,20,typer('Location')),
-                          ('Number',blue,20,typer('Number')),
-                          ('Rollershutter',blue,20,typer('Rollershutter')),
-                          ('String',blue,20,typer('String')),
-                          ('Switch',blue,20,typer('Switch'))]
-                MenuUI.menu.load(MenuUI.menu.slotconf,'Type',yellow,types,backer)
+                counter = 1
+                things = []
+                while counter <= len(devicetypes.types):
+                    thing = devicetypes.types[counter-1]
+                    things.append((thing[0],blue,20,typer(thing)))
+                    counter = counter + 1
+                MenuUI.menu.load(MenuUI.menu.slotconf,'Type',yellow,things,backer)
                 MenuUI.back = 1
+            def op():
+                counter = 1
+                while counter <= len(devicetypes.types):
+                    if devicetypes.types[counter-1][0] == type:
+                        disinitdis()
+                        options = devicetypes.types[counter-1][3](device[4])
+                        if options != False:
+                            layout.devices.pop(position-1)
+                            detail = list(device)
+                            detail.pop(4)
+                            detail.insert(4,options)
+                            layout.devices.insert(position-1,tuple(detail))
+                        initdis()
+                        interface(name,type)
+                        check()
+                        global returner
+                        returner = 1
+                    counter = counter + 1
             make_button(name, 40, 85, 40, 240, 5, yellow, 40, change)
-            make_button('Type: '+type, 25, 139, 27, 130, 5, red, 25, mode)
-            #make_button('Move', 165, 139, 27, 130, 5, blue, 25, move)
+            make_button('Type: '+type, 25, 139, 27, 130, 5, red, 20, mode)
+            make_button('Options', 165, 139, 27, 130, 5, red, 25, op)
             def exit(): MenuUI.back = 1
             MenuUI.menu.slotconf(7, ('Back', white, 24, exit))
         def check():
@@ -391,7 +414,12 @@ class UIConfig:
                     while devicecounter <= len(layout.devices):
                        device = layout.devices[devicecounter-1]
                        if (device[0] == floorcounter) and (device[1] == roomcounter):
-                           os.system('echo '+"'"+device[3]+' '+'d'+str(devicecounter-1)+' "'+device[2]+'" ('+'r'+str(roomcounter-1)+')'+"'"+' >> /etc/openhab/configurations/items/main.items')
+                           counter = 1
+                           while counter <= len(devicetypes.types):
+                               if devicetypes.types[counter-1][0] == device[3]:
+                                   deviceadd = devicetypes.types[counter-1][4]('d'+str(devicecounter-1),device[2],'r'+str(roomcounter-1),device[4])
+                                   os.system('echo '+"'"+deviceadd+"'"+' >> /etc/openhab/configurations/items/main.items')
+                               counter = counter + 1
                        devicecounter = devicecounter + 1
                     devicecounter = 1
                     #################
@@ -408,6 +436,21 @@ class UIConfig:
         #  counter = counter + 1
         #######################################################################################
 
+    def devtypesconfig(self):
+            def launch(thing):
+              def func():
+                disinitdis()
+                thing[1]()
+                initdis()
+              return func
+            counter = 1
+            things = []
+            while counter <= len(devicetypes.types):
+                thing = devicetypes.types[counter-1]
+                things.append((thing[0],orange,20,launch(thing)))
+                counter = counter + 1
+            MenuUI.menu.load(MenuUI.menu.slotconf,'Type',green,things,backer)
+
 def passs(): pass #Debugging
-mainmenu = (('WebUI', yellow, 24, WebUI),('UI config', green, 24, UIConfig().floors)) #Debugging
+mainmenu = (('WebUI', yellow, 24, WebUI),('Config', green, 24, UIConfig().mainmenu)) #Debugging
 MenuUI.menu.load(MenuUI.menu.slotconf,'OpenHAB',cyan,mainmenu,backer)
