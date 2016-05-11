@@ -102,14 +102,14 @@ class UIConfig:
                 while counter <= len(layout.groups):
                   thing = layout.groups[counter-1]
                   if thing[0] == 0:
-                      thing = (thing[2],blue,20,passs)#UIConfig().select(0,counter,thing))
+                      thing = (thing[2],blue,20,UIConfig().select(0,counter,thing))
                       things.append(thing)
                   counter = counter + 1
                 counter = 1
                 while counter <= len(layout.devices):
                   thing = layout.devices[counter-1]
                   if thing[0] == 0:
-                      thing = (thing[1],blue,20,passs)#UIConfig().select(1,counter,thing))
+                      thing = (thing[1],blue,20,UIConfig().select(1,counter,thing))
                       things.append(thing)
                   counter = counter + 1
                 MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
@@ -121,14 +121,14 @@ class UIConfig:
                 while counter <= len(layout.groups):
                   thing = layout.groups[counter-1]
                   if thing[0] == groupno:
-                      thing = (thing[2],blue,20,passs)#UIConfig().select(0,counter,thing))
+                      thing = (thing[2],blue,20,UIConfig().select(0,counter,thing))
                       things.append(thing)
                   counter = counter + 1
                 counter = 1
                 while counter <= len(layout.devices):
                   thing = layout.devices[counter-1]
                   if thing[0] == groupno:
-                      thing = (thing[1],blue,20,passs)#UIConfig().select(1,counter,thing))
+                      thing = (thing[1],blue,20,UIConfig().select(1,counter,thing))
                       things.append(thing)
                   counter = counter + 1
                 MenuUI.menu.load(MenuUI.menu.slotconf,'Select',yellow,things,backer)
@@ -161,7 +161,7 @@ class UIConfig:
                 MenuUI.back = 1
             make_button(name, 40, 85, 40, 240, 5, yellow, 40, change)
             make_button('Remove', 25, 139, 27, 130, 5, red, 25, remove)
-            #make_button('Move', 165, 139, 27, 130, 5, blue, 25, move)
+            make_button('Move', 165, 139, 27, 130, 5, blue, 25, move)
             def exit():
                 MenuUI.back = 1
             MenuUI.menu.slotconf(7, ('Back', white, 24, exit))
@@ -171,48 +171,52 @@ class UIConfig:
               if MenuUI.back == 1: break
         if mode == 0:
             def rename(renamed):
-                layout.floors.pop(position-1)
-                layout.floors.insert(position-1,renamed)
+                layout.groups.pop(position-1)
+                detail = list(details)
+                detail.pop(2)
+                detail.insert(2,renamed)
+                layout.groups.insert(position-1,tuple(detail))
             def remove():
-                layout.floors.pop(position-1)
-                UIConfig().remove(1,position)
-                MenuUI.back = 1
-            def move(place):
-                def func():
-                    layout.floors.pop(position-1)
-                    layout.floors.insert(place-1,details)
-                    returner = 1
-                    MenuUI.back = 1
-                return func
-            interface('Group',details,rename,remove,len(layout.floors),move)
-            check()
-        elif mode == 1:
-            def rename(renamed):
-                layout.rooms.pop(position-1)
-                layout.rooms.insert(position-1,(details[0],renamed))
-            def remove():
-                layout.rooms.pop(position-1)
-                UIConfig().remove(2,(details[0],position))
+                layout.groups.pop(position-1)
+                def subremove(mode,details):
+                    counter = 1
+                    if mode == 1:
+                        oglist = tuple(layout.groups)
+                        while counter <= len(oglist):
+                            thing = oglist[counter-1]
+                            if thing[0] == details[1]:
+                                layout.groups.remove(thing)
+                                subremove(1,thing)
+                                subremove(2,thing)
+                            counter = counter + 1
+                    if mode == 2:
+                        oglist = tuple(layout.devices)
+                        while counter <= len(oglist):
+                          thing = oglist[counter-1]
+                          if thing[0] == details[1]: layout.devices.remove(thing)
+                          counter = counter + 1
+                subremove(1,details)
+                subremove(2,details)
                 MenuUI.back = 1
             noplaces = 0
             things = []
             counter = 1
-            while counter <= len(layout.rooms):
-                thing = layout.rooms[counter-1]
-                if thing[0] == details[0]:
+            while counter <= len(layout.groups):
+                thing = layout.groups[counter-1]
+                if thing[0] == details[1]:
                     noplaces = noplaces + 1
                     things.append(counter-1)
                 counter = counter + 1
             def move(place):
                 def func():
-                    layout.rooms.pop(position-1)
-                    layout.rooms.insert(things[place-1],details)
+                    layout.groups.pop(position-1)
+                    layout.groups.insert(place-1,details)
                     returner = 1
                     MenuUI.back = 1
                 return func
-            interface('Room',details[1],rename,remove,noplaces,move)
+            interface('Group',details[2],rename,remove,noplaces,move)
             check()
-        elif mode == 2:
+        elif mode == 1:
             def rename(renamed):
                 layout.devices.pop(position-1)
                 detail = list(details)
@@ -227,7 +231,7 @@ class UIConfig:
             counter = 1
             while counter <= len(layout.devices):
                 thing = layout.devices[counter-1]
-                if (thing[0] == details[0]) and (thing[1] == details[1]):
+                if thing[0] == details[1]:
                     noplaces = noplaces + 1
                     things.append(counter-1)
                 counter = counter + 1
@@ -238,28 +242,11 @@ class UIConfig:
                     returner = 1
                     MenuUI.back = 1
                 return func
-            interface('Device',details[2],rename,remove,noplaces,move)
+            interface('Device',details[1],rename,remove,noplaces,move)
             check()
         returner = 1
       return func
 
-    def remove(self,mode,details):
-        counter = 1
-        if mode == 1:
-            oglist = tuple(layout.rooms)
-            while counter <= len(oglist):
-                thing = oglist[counter-1]
-                if thing[0] == details:
-                    layout.rooms.remove(thing)
-                    UIConfig().remove(2,(thing[0],counter))
-                counter = counter + 1
-        if mode == 2:
-            oglist = tuple(layout.devices)
-            while counter <= len(oglist):
-              thing = oglist[counter-1]
-              if (thing[0] == details[0]) and (thing[1] == details[1]): layout.devices.remove(thing)
-              counter = counter + 1
-              
     def home(self):
         counter = 1
         things = []
