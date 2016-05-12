@@ -203,7 +203,7 @@ class UIConfig:
             counter = 1
             while counter <= len(layout.groups):
                 thing = layout.groups[counter-1]
-                if thing[0] == details[1]:
+                if thing[0] == details[0]:
                     noplaces = noplaces + 1
                     things.append(counter-1)
                 counter = counter + 1
@@ -231,7 +231,7 @@ class UIConfig:
             counter = 1
             while counter <= len(layout.devices):
                 thing = layout.devices[counter-1]
-                if thing[0] == details[1]:
+                if thing[0] == details[0]:
                     noplaces = noplaces + 1
                     things.append(counter-1)
                 counter = counter + 1
