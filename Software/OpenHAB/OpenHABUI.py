@@ -209,8 +209,23 @@ class UIConfig:
                 counter = counter + 1
             def move(place):
                 def func():
+                    def groupplace(groupno):
+                      groupthings = 0
+                      counter = 1
+                      while counter <= len(layout.groups):
+                        thing = layout.groups[counter-1]
+                        if thing[0] == groupno:
+                            groupthings = groupthings + 1
+                        counter = counter + 1
+                      return groupthings
+                    groupno = 0
+                    places = 0
+                    while groupno < details[0]:
+                        places = places + groupplace(groupno)
+                        groupno = groupno + 1
                     layout.groups.pop(position-1)
-                    layout.groups.insert(place-1,details)
+                    layout.groups.insert(places+place-2,details)
+                    global returner
                     returner = 1
                     MenuUI.back = 1
                 return func
@@ -237,8 +252,23 @@ class UIConfig:
                 counter = counter + 1
             def move(place):
                 def func():
+                    def groupplace(groupno):
+                      groupthings = 0
+                      counter = 1
+                      while counter <= len(layout.devices):
+                        thing = layout.devices[counter-1]
+                        if thing[0] == groupno:
+                            groupthings = groupthings + 1
+                        counter = counter + 1
+                      return groupthings
+                    groupno = 0
+                    places = 0
+                    while groupno < details[0]:
+                        places = places + groupplace(groupno)
+                        groupno = groupno + 1
                     layout.devices.pop(position-1)
-                    layout.devices.insert(place-1,details)
+                    layout.devices.insert(places-1+place-1,details)
+                    global returner
                     returner = 1
                     MenuUI.back = 1
                 return func
