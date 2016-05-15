@@ -9,4 +9,4 @@ Main Goals:
   
   TV Box
 
-Weekly Updates! (except during my exams)
+Probably Weekly Updates! (except during my exams and when completed or so)
