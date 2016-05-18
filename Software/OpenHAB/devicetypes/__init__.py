@@ -14,3 +14,6 @@ types = []
 
 import devicetest
 types.append(devicetest.config)
+
+import Stuff
+types.append(Stuff.config)
