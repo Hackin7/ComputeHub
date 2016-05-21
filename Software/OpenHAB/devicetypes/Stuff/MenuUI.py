@@ -32,7 +32,6 @@ class Menusys:
 
  def layout(self,slotconf,tag,tagcolour,app,others): 
    make_label(tag, 20, 20, 47, tagcolour)
-   others()
    counter = 1  
    while counter <= 6: #Maximun no. of slots
      if page*6+counter-1 >= len(app): break #Stop at no. of programs
@@ -51,6 +50,7 @@ class Menusys:
      clearall()
    if counter > 6: slotconf(8, ('Next', white, 24, nextpage))
    slotconf(7, ('Back', white, 24, exit))
+   others()
  
  def check(self,slotconf,tag,tagcolour,app,others):
   while 1:

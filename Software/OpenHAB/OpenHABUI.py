@@ -1,7 +1,6 @@
 import os
 from PitftGraphicLib import *
 from virtualKeyboard import VirtualKeyboard
-screen = pygame.display.set_mode(size)
 initdis()
 import MenuUI
 import devicetypes
@@ -55,6 +54,7 @@ class UIConfig:
         global typeset
         typeset = 0
         def change():
+            screen = pygame.display.set_mode(size)
             vkey = VirtualKeyboard(screen)
             global name
             name = vkey.run(name)
@@ -144,6 +144,7 @@ class UIConfig:
             clearall()
             make_label(level + ':', 40, 30, 60, cyan)
             def change():
+                screen = pygame.display.set_mode(size)
                 vkey = VirtualKeyboard(screen)
                 newname = vkey.run(name)
                 clearall()
@@ -209,6 +210,25 @@ class UIConfig:
                 counter = counter + 1
             def move(place):
                 def func():
+                    layout.groups.pop(position-1) 
+                    counter = 1
+                    highno = 0
+                    while counter <= len(layout.groups):
+                        if layout.groups[counter-1][0] > highno: highno = layout.groups[counter-1][0]
+                        counter = counter + 1
+                    groupno = 0
+                    pos = 0
+                    glist = layout.groups
+                    while groupno <= highno:
+                      intcounter = 1
+                      while intcounter <= len(glist):
+                        thing = glist[intcounter-1]
+                        if thing[0] == groupno:
+                            layout.groups.remove(thing)
+                            layout.groups.insert(pos,thing)
+                            pos = pos + 1
+                        intcounter = intcounter + 1
+                      groupno = groupno + 1
                     def groupplace(groupno):
                       groupthings = 0
                       counter = 1
@@ -223,8 +243,8 @@ class UIConfig:
                     while groupno < details[0]:
                         places = places + groupplace(groupno)
                         groupno = groupno + 1
-                    layout.groups.pop(position-1)
-                    layout.groups.insert(places+place-2,details)
+                    layout.groups.insert(places+place-1,details)
+                    #print layout.groups
                     global returner
                     returner = 1
                     MenuUI.back = 1
@@ -252,6 +272,25 @@ class UIConfig:
                 counter = counter + 1
             def move(place):
                 def func():
+                    layout.devices.pop(position-1) 
+                    counter = 1
+                    highno = 0
+                    while counter <= len(layout.devices):
+                        if layout.devices[counter-1][0] > highno: highno = layout.devices[counter-1][0]
+                        counter = counter + 1
+                    groupno = 0
+                    pos = 0
+                    glist = layout.devices
+                    while groupno <= highno:
+                      intcounter = 1
+                      while intcounter <= len(glist):
+                        thing = glist[intcounter-1]
+                        if thing[0] == groupno:
+                            layout.devices.remove(thing)
+                            layout.devices.insert(pos,thing)
+                            pos = pos + 1
+                        intcounter = intcounter + 1
+                      groupno = groupno + 1
                     def groupplace(groupno):
                       groupthings = 0
                       counter = 1
@@ -266,8 +305,7 @@ class UIConfig:
                     while groupno < details[0]:
                         places = places + groupplace(groupno)
                         groupno = groupno + 1
-                    layout.devices.pop(position-1)
-                    layout.devices.insert(places-1+place-1,details)
+                    layout.devices.insert(places-1+place,details)
                     global returner
                     returner = 1
                     MenuUI.back = 1
@@ -327,6 +365,7 @@ class UIConfig:
                 detail.insert(1,renamed)
                 layout.devices.insert(position-1,tuple(detail))
             def change():
+                screen = pygame.display.set_mode(size)
                 vkey = VirtualKeyboard(screen)
                 newname = vkey.run(device[1])
                 rename(newname)
@@ -348,9 +387,6 @@ class UIConfig:
                            detail.pop(3)
                            detail.insert(3,options)
                        layout.devices.insert(position-1,tuple(detail))
-                       clearall()
-                       interface(name,mode[0])
-                       check()
                        global returner
                        returner = 1
                     return func
@@ -361,23 +397,22 @@ class UIConfig:
                     things.append((thing[0],blue,20,typer(thing)))
                     counter = counter + 1
                 MenuUI.menu.load(MenuUI.menu.slotconf,'Type',yellow,things,backer)
-                MenuUI.back = 1
+                clearall()
+                interface(name,layout.devices[position-1][2]) 
             def op():
                 counter = 1
                 while counter <= len(devicetypes.types):
                     if devicetypes.types[counter-1][0] == type:
                         disinitdis()
-                        options = devicetypes.types[counter-1][3](device[3])
+                        options = devicetypes.types[counter-1][3](layout.devices[position-1][3])
                         if options != False:
+                            detail = list(layout.devices[position-1])
                             layout.devices.pop(position-1)
-                            detail = list(device)
                             detail.pop(3)
                             detail.insert(3,options)
                             layout.devices.insert(position-1,tuple(detail))
                         initdis()
-                        interface(name,type)
-                        check()
-                        MenuUI.back = 1
+                        interface(name,type)  
                     counter = counter + 1
             make_button(name, 40, 85, 40, 240, 5, yellow, 40, change)
             make_button('Type: '+type, 25, 139, 27, 130, 5, red, 20, mode)
@@ -391,14 +426,11 @@ class UIConfig:
         interface(device[1],device[2])
         check()
         MenuUI.back = 0
-        if group == 0:
-            UIConfig().home()
-        else:
-            UIConfig().groups(group[0],group[1])()
+        if group == 0: UIConfig().home()
+        else: UIConfig().groups(group[0],group[1])()
         global returner
         returner = 1
       return func
-
         
     def filerewrite(self):
         #####layout.py##########################################################################
