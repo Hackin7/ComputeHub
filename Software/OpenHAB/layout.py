@@ -23,7 +23,7 @@ groups.append((15, 20, 'Init5'))
 groups.append((15, 21, 'Init6'))
 groups.append((15, 22, 'Init7'))
 devices = []
-devices.append((0, 'dev', 'None', 'Empty'))
+devices.append((0, 'dev', 'Stuff', ('Electrical Outlet', 0, 0, 'Undefined')))
 devices.append((0, '1', 'DeviceTest', 'Switch'))
 devices.append((1, '1', 'DeviceTest', 'Dimmer'))
 devices.append((1, '2', 'None', 'Empty'))
