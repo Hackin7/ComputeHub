@@ -21,6 +21,7 @@ def updateinfo():
     os.system('echo "wifipassword = '+"'"+info.wifipassword+"'"+'" >> '+directory+'info.py')
     os.system('echo "mqttbrokerurl = '+"'"+info.mqttbrokerurl+"'"+'" >> '+directory+'info.py')
     os.system('echo "mqttport ='+"'"+info.mqttport+"'"+' " >> '+directory+'info.py')
+    os.system('echo "mqtttopic ='+"'"+info.mqtttopic+"'"+' " >> '+directory+'info.py')
     os.system('echo "######################" >> '+directory+'info.py')
     ##########################################################################################
 
@@ -61,12 +62,22 @@ def mainsetup():
             mqttsetup()
             global returner
             returner = 1
-        options = [('',black,0,passs),('',black,0,passs),('',black,0,passs),(info.mqttbrokerurl,orange,20,modbroker),('',black,0,passs),(info.mqttport,orange,20,modport)]
+        def modtopic():
+            screen = pygame.display.set_mode(size)
+            vkey = VirtualKeyboard(screen)
+            info.mqtttopic = vkey.run(info.mqtttopic)
+            mqttsetup()
+            global returner
+            returner = 1
+        options = [('',black,0,passs),('',black,0,passs),('',black,0,passs),(info.mqttbrokerurl,orange,20,modbroker),('',black,0,passs),(info.mqttport,orange,20,modport),('',black,0,passs),('',black,0,passs),('',black,0,passs),(info.mqtttopic,orange,20,modtopic)]
         def loadup():
             make_button('Own/Other Broker', 25, 75, 27, 270, 5, orange, 24, passs)
             backer()
-            make_label('Broker URL:', 25, 112, 25, orange)
-            make_label('Port:', 25, 149, 25, orange)
+            if MenuUI.page == 0:
+                make_label('Broker URL:', 25, 112, 25, orange)
+                make_label('Port:', 25, 149, 25, orange)
+            if MenuUI.page == 1:
+                make_label('Main Topic:', 25, 112, 25, orange)
         MenuUI.menu.load(MenuUI.menu.slotconf,'MQTT',green,options,loadup)
     Settings = [('Wifi',yellow,24,wifisetup),('MQTT',yellow,20,mqttsetup)]
     def loadup():
@@ -162,9 +173,10 @@ def deviceconnect():
             returner = 1
         def loadup():
             backer()
-            make_button('Specific Config', 25, 75, 27, 270, 5, orange, 24, changeconfigmode)
-            make_label('Wifi Network:', 25, 112, 25, orange)
-            make_label('Password:', 25, 149, 25, orange)
+            if MenuUI.page == 0:
+                make_button('Specific Config', 25, 75, 27, 270, 5, orange, 24, changeconfigmode)
+                make_label('Wifi Network:', 25, 112, 25, orange)
+                make_label('Password:', 25, 149, 25, orange)
       MenuUI.menu.load(MenuUI.menu.slotconf,'Wifi',green,options,loadup)
     def mqttspecific():
       global alldevinfo
@@ -174,7 +186,7 @@ def deviceconnect():
             global alldevinfo
             dev = list(alldevinfo)
             dev.pop(2)
-            dev.insert(2,(info.mqttbrokerurl,info.mqttport))
+            dev.insert(2,(info.mqttbrokerurl,info.mqttport,info.mqtttopic))
             global moder
             moder = tuple(dev)
             alldevinfo = tuple(dev)
@@ -219,6 +231,23 @@ def deviceconnect():
             mqttspecific()
             global returner
             returner = 1
+        def modtopic():
+            screen = pygame.display.set_mode(size)
+            vkey = VirtualKeyboard(screen)
+            global alldevinfo
+            port = alldevinfo[2][2]
+            dev = list(alldevinfo)
+            mqtt = list(dev[2])
+            mqtt.pop(2)
+            mqtt.insert(2,vkey.run(port))
+            dev.pop(2)
+            dev.insert(2,tuple(mqtt))
+            global moder
+            moder = tuple(dev)
+            alldevinfo = tuple(dev)
+            mqttspecific()
+            global returner
+            returner = 1
         def changeconfigmode():
             global alldevinfo
             dev = list(alldevinfo)
@@ -230,12 +259,15 @@ def deviceconnect():
             mqttspecific()
             global returner
             returner = 1
-        options = [('',black,0,passs),('',black,0,passs),('',black,0,passs),(alldevinfo[2][0],orange,20,modbroker),('',black,0,passs),(alldevinfo[2][1],orange,20,modport)]
+        options = [('',black,0,passs),('',black,0,passs),('',black,0,passs),(alldevinfo[2][0],orange,20,modbroker),('',black,0,passs),(alldevinfo[2][1],orange,20,modport),('',black,0,passs),('',black,0,passs),('',black,0,passs),(alldevinfo[2][2],orange,20,modtopic)]
         def loadup():
             backer()
             make_button('Specific Config', 25, 75, 27, 270, 5, orange, 24, changeconfigmode)
-            make_label('Broker URL:', 25, 112, 25, orange)
-            make_label('Port:', 25, 149, 25, orange)
+            if MenuUI.page == 0:
+                make_label('Broker URL:', 25, 112, 25, orange)
+                make_label('Port:', 25, 149, 25, orange)
+            if MenuUI.page == 1:
+                make_label('Main Topic:', 25, 112, 25, orange)
       MenuUI.menu.load(MenuUI.menu.slotconf,'MQTT',green,options,loadup)
     def connection(ip):
         def loadup():
@@ -279,6 +311,10 @@ def devicemod(options):
     return moder
 
 def devicewrite(device,devicename,room,options):
-    return ('','')#(options+' item='+device+' icon"slider"',options+' '+device+' "'+devicename+'" ('+room+')')
+    if options[0] == 'Electrical Outlet':
+        return ('Switch item='+device+' icon"slider"','Switch '+device+' "'+devicename+'" ('+room+') {mqtt="<[broker:/'+info.mqtttopic+'/d:command:ON]"}')#>[broker:/'+info.mqtttopic+'/d:command:ON:ON],>[broker:/'+info.mqtttopic+'/d:command:OFF:OFF]"}')
+    else:
+        print 'No Config!'
+        return ('','')
 
 config = ('Stuff',mainsetup,devicesetup,devicemod,devicewrite)

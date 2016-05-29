@@ -1,3 +1,4 @@
+onoff = 1
 groups = []
 groups.append((0, 1, 'Group1'))
 groups.append((0, 2, 'Group2'))

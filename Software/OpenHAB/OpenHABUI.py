@@ -24,7 +24,22 @@ def backer():
 class UIConfig:
     def __init__(self): pass
     def mainmenu(self):
-        MenuUI.menu.load(MenuUI.menu.slotconf,'Config',green,[('Structure',orange,20,UIConfig().home),('Device Types',orange,20,UIConfig().devtypesconfig)],backer)
+        def switch():
+            if layout.onoff == 1:
+                layout.onoff = 0
+                os.system('sudo service openhab stop &')
+                os.system('sudo update-rc.d openhab disable &')
+            elif layout.onoff == 0:
+                layout.onoff = 1
+                os.system('sudo service openhab start &')
+                os.system('sudo update-rc.d openhab enable &')
+        def loadup():
+            backer()
+            if layout.onoff == 1: state =  'Switch Off'
+            elif layout.onoff == 0: state =  'Switch On'
+            make_button(state, 25, 75, 27, 130, 5, orange, 20, switch)
+        MenuUI.menu.load(MenuUI.menu.slotconf,'Config',green,[('',black,0,passs),('Structure',orange,20,UIConfig().home),('Device Types',orange,20,UIConfig().devtypesconfig)],loadup)
+        UIConfig().filerewrite()
     def addon(self,mode,*details):
       def func():
         backer()  
@@ -332,7 +347,6 @@ class UIConfig:
               things.append(thing)
           counter = counter + 1
         MenuUI.menu.load(MenuUI.menu.slotconf,'Home',green,things,UIConfig().addon(0,0))
-        UIConfig().filerewrite()
     def groups(self,groupno,name):
       def func():
         counter = 1
@@ -434,8 +448,9 @@ class UIConfig:
         
     def filerewrite(self):
         #####layout.py##########################################################################
+        os.system('echo "onoff = '+str(layout.onoff)+'" > layout.py')
         #####Groups#########################
-        os.system('echo "groups = []" > layout.py')
+        os.system('echo "groups = []" >> layout.py')
         counter = 1
         while counter <= len(layout.groups):
           os.system('echo "groups.append('+str(layout.groups[counter-1])+')" >> layout.py')
