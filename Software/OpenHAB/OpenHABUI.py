@@ -28,11 +28,11 @@ class UIConfig:
             if layout.onoff == 1:
                 layout.onoff = 0
                 os.system('sudo service openhab stop &')
-                os.system('sudo update-rc.d openhab disable &')
+                os.system('sudo systemctl disable openhab.service &')
             elif layout.onoff == 0:
                 layout.onoff = 1
                 os.system('sudo service openhab start &')
-                os.system('sudo update-rc.d openhab enable &')
+                os.system('sudo systemctl enable openhab.service &')
         def loadup():
             backer()
             if layout.onoff == 1: state =  'Switch Off'
