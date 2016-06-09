@@ -11,7 +11,7 @@ def backer():
         elif (MenuUI.page == 0):
            MenuUI.back = 1
            returner = 0
-print os.getcwd()
+#print os.getcwd()
 import info
 prevmqtturl = info.mqttbrokerurl + ':' + info.mqttport
 def updateinfo():
@@ -83,12 +83,17 @@ def mainsetup():
         options = [('',black,0,passs),('',black,0,passs),('',black,0,passs),(info.mqttbrokerurl,orange,20,modbroker),('',black,0,passs),(info.mqttport,orange,20,modport),('',black,0,passs),('',black,0,passs),('',black,0,passs),(info.mqtttopic,orange,20,modtopic)]
         def loadup():
             if info.mqttlocalext == 0:
-                def change(): info.mqttlocalext = 1
+                def change():
+                    info.mqttlocalext = 1
+                    os.system('systemctl stop mosquitto.service')
+                    os.system('systemctl disable mosquitto.service')
                 make_button('Local Broker', 25, 75, 27, 270, 5, orange, 24, change)
             if info.mqttlocalext == 1:
                 def change():
                     info.mqttlocalext = 0
                     info.mqttbrokerurl = 'localhost'
+                    os.system('systemctl start mosquitto.service')
+                    os.system('systemctl enable mosquitto.service')
                     mqttsetup()
                     global returner
                     returner = 1

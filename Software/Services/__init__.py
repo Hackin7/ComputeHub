@@ -35,18 +35,17 @@ notif = [("F", green, 24, code),("F", blue, 24, code),("F", red, 24, code),("F",
 ##########################################################################
 
 ######The Service/Notifications List ##### Layout: import (service)######
-import CloudComSetup
-import IOTNotif
+import VNCSetup
 ######Layout: (service).setup()########################################### 
 def setup():
-  IOTNotif.setup()
-  CloudComSetup.setup()
+  pass
+  VNCSetup.setup()
 #########################################################################
 
 def check():
   ########Notif layout: putup(notif)#####################################
   global notif
-  putup(IOTNotif) 
+  #putup(IOTNotif) 
   global shit
   if shit == 1: 
      #Notif Structure  (Label, colour, fontsize, setfunction)       

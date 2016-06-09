@@ -32,24 +32,33 @@ Wifi = ("Wifi", green, 24, main, exit)
 ###################################
 def main():
   #Program launch#############
-  os.system('cd Things && sudo python Things.py &')
+  os.system('cd OpenHAB && sudo python OpenHABUI.py &')
 def exit(): 
-  os.system('pkill -f Things.py')
+  os.system('pkill -f OpenHABUI.py')
   os.system("sleep 1")
 #Structure  (Label, colour, fontsize, setfunction, exitfunction)       
-Things = ("Things", cyan, 24, main, exit)
+Things = ("OpenHAB", cyan, 24, main, exit)
 ###################################
 def main():
   #Program launch#############
-  os.system('cd CloudComputing && sudo python CloudCom.py &')
+  os.system('cd VNC && sudo python VNC.py &')
 def exit(): 
-  os.system('pkill -f CloudCom.py')
+  os.system('pkill -f VNC.py')
   os.system("sleep 1")
 #Structure  (Label, colour, fontsize, setfunction, exitfunction)       
-CloudCom = ("CloudCom", yellow, 22, main, exit)
+CloudCom = ("VNC", yellow, 22, main, exit)
+###################################
+def main():
+  #Program launch#############
+  os.system('cd Owncloud && sudo python OwncloudUI.py &')
+def exit(): 
+  os.system('pkill -f OwncloudUI.py')
+  os.system("sleep 1")
+#Structure  (Label, colour, fontsize, setfunction, exitfunction)       
+Owncloud = ("Owncloud", yellow, 22, main, exit)
 ###################################
 def passs(): pass #Debugging
 shit = ('Shit', green, 24, passs,passs) #Debugging
 
 #Program layout can be according to piority
-programs = [Wifi,Things,CloudCom,Exit]
+programs = [Wifi,Things,CloudCom,Owncloud,Exit]

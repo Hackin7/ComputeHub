@@ -1,4 +1,5 @@
 import os
+import subprocess
 from PitftGraphicLib import *
 from virtualKeyboard import VirtualKeyboard
 initdis()
@@ -38,7 +39,7 @@ class UIConfig:
             if layout.onoff == 1: state =  'Switch Off'
             elif layout.onoff == 0: state =  'Switch On'
             make_button(state, 25, 75, 27, 130, 5, orange, 20, switch)
-        MenuUI.menu.load(MenuUI.menu.slotconf,'Config',green,[('',black,0,passs),('Structure',orange,20,UIConfig().home),('Device Types',orange,20,UIConfig().devtypesconfig)],loadup)
+        MenuUI.menu.load(MenuUI.menu.slotconf,'Config',green,[('',black,0,passs),('Structure',orange,20,UIConfig().home),('Device Types',orange,20,UIConfig().devtypesconfig),('My.OpenHAB',orange,20,UIConfig().myopenhab)],loadup)
         UIConfig().filerewrite()
     def addon(self,mode,*details):
       def func():
@@ -529,6 +530,14 @@ class UIConfig:
                 things.append((thing[0],orange,20,launch(thing)))
                 counter = counter + 1
             MenuUI.menu.load(MenuUI.menu.slotconf,'Type',green,things,backer)
+    def myopenhab(self):
+        uuid = subprocess.Popen(["cat","/usr/share/openhab/webapps/static/uuid"],stdout=subprocess.PIPE,stderr=subprocess.PIPE).stdout.read().decode()
+        secret = subprocess.Popen(["cat","/usr/share/openhab/webapps/static/secret"],stdout=subprocess.PIPE,stderr=subprocess.PIPE).stdout.read().decode()
+        def loadup():
+            backer()
+            make_label('UUID:'+uuid, 25, 75, 18, orange)
+            make_label('Secret:'+secret, 25, 100, 20, orange)
+        MenuUI.menu.load(MenuUI.menu.slotconf,'My.OpenHAB info',green,(),loadup)
 
 def passs(): pass #Debugging
 mainmenu = (('WebUI', yellow, 24, WebUI),('Config', green, 24, UIConfig().mainmenu)) #Debugging
